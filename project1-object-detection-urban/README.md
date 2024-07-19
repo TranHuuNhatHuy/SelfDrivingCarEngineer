@@ -23,8 +23,19 @@ First, run `1_train_model.ipynb` to train your model. Once the training job is c
 Each notebook contains the instructions for running the code, as well the requirements for the writeup. 
 >Note: Only the first notebook requires a write up. 
 
-## Useful links
-* The Tensorflow Object Detection API tutorial is a great resource to debug your code. This [section](https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/training.html#configure-the-training-pipeline) in particular will teach you how to edit the `pipeline.config` file to update
-your training job.
 
-* [This blog post](https://aws.amazon.com/blogs/machine-learning/training-and-deploying-models-using-tensorflow-2-with-the-object-detection-api-on-amazon-sagemaker/) teaches how to label data, train and deploy a model with the Tensorflow Object Detection API and AWS Sagemaker.
+# My result
+
+Result was achieved using pre-trained [`EfficientDet D1 640x640`](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md#:~:text=EfficientDet%20D1%20640x640), with configs:
+
+- Training configs:
+    + Training steps: 2000
+    + Batch size: 8
+    + Data augmentation method: random horizontal flip & random scale cropping and padding to square
+    + Optimizer: momentum optimizer
+- Evaluation configs:
+    + Metric: COCO detection
+    + Batch size: 1
+- Notebook computation instance type: ml.g5.4xlarge
+
+Result video can be seen at [./2_run_inference/output.avi](https://github.com/TranHuuNhatHuy/SelfDrivingCarEngineer/blob/master/project1-object-detection-urban/2_run_inference/output.avi)
