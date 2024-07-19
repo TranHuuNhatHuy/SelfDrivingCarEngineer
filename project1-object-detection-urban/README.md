@@ -39,3 +39,5 @@ Result was achieved using pre-trained [`EfficientDet D1 640x640`](https://github
 - Notebook computation instance type: ml.g5.4xlarge
 
 Result video can be seen at [./2_run_inference/output.avi](https://github.com/TranHuuNhatHuy/SelfDrivingCarEngineer/blob/master/project1-object-detection-urban/2_run_inference/output.avi)
+
+<img width="624" alt="image" src="https://github.com/user-attachments/assets/6753f001-06f3-4f35-aeed-f4f2f7a51943">
