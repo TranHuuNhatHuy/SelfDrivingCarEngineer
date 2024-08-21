@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 .DS_Store
+
+project1-object-detection-urban/1_model_training/source_dir/checkpoint/*
