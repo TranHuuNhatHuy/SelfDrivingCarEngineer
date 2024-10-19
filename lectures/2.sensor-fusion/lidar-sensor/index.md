@@ -149,3 +149,82 @@ Another sensor type belonging to the class of solid-state sensors is the **Optic
 
 ![alt text](image-13.png)
 
+## IV. Range images
+
+Typically, the sensor data provided by a lidar scanner is represented as a 3d point cloud, where each point corresponds to the measurement of a single lidar beam. Each point is described by a coordinate in $(x, y, z)$ and additional attributes such as the intensity of the reflected laser pulse or even a secondary return caused by partial reflection at object boundaries. In the following figure, a point cloud is shown where the brightness of a 3d point encodes the intensity of the laser reflection.
+
+![alt text](image-14.png)
+
+In the figure below, a point $p$ in space is mapped into a range image cell, which is indicated by the corresponding azimuth angle $\alpha_p$ (yaw) and the inclination $\beta_p$ (pitch) of the sensor.
+
+![alt text](image-15.png)
+
+We now know that a range image has 64 lines and 2650 columns. From the previous section, we know that the top lidar covers a horizontal angle of 360°. This means that each column in the range image covers an arc of $360° / 2650 = 0.1358°$, which corresponds to a horizontal resolution of $≈8'$ angular minutes.
+
+### 1. Visualize range channels
+
+Below is range image data in 8-bit channel.
+
+![alt text](image-16.png)
+
+And here is cropped range image range data.
+
+![alt text](image-17.png)
+
+### 2. Visualize Lidar data: point clouds
+
+#### a. Convert range images to point clouds
+
+In order to perform this spatial reconstruction, we simply need to invert the mapping process. Below is Azimuth and inclination of 3d points.
+
+![alt text](image-18.png)
+
+Based on pitch and yaw angle as well as on the actual range of a point $p$, we can use the concept of spherical coordinates(opens in a new tab) to reconstruct the $x, y, z$ components of $p$.
+
+$x = r_p \cdot cos(\alpha_p) \cdot cos(\beta_p)$
+
+$y = r_p \cdot sin(\alpha_p) \cdot cos(\beta_p)$
+
+$z = r_p \cdot sin(\beta_p)$
+
+As a next step, we need to correct the azimuth angle in such a way that the center of the range image corresponds to the direction of the forward-facing x-axis of the Waymo vehicle. To do this, we need to extract the **extrinsic calibration matrix** of the top lidar sensor:
+
+$\begin{bmatrix}R_{3x3} & T_{3x1}\\0_{1x3} & 1\end{bmatrix}$
+
+When you compare the first and second component with the spherical coordinates transformation equations, you will notice that the first component corresponds to $x$ and the second component to $y$. Therefore, in order to get the rotation angle of the coordinate system around the z-axis (which is the azimuth correction), we can use the following equation:
+
+$\alpha_{corr} = arctan(y/x)$
+
+![alt text](image-19.png)
+
+## V. Conclusion
+
+### 1. Terms and symbols
+
+- LiDAR : Light Detection And Ranging.
+- Range : Straight-line distance measured between sensor and obstacle.
+- Spatial resolution : Measure of the smallest object that can be resolved by the sensor.
+- Object classification : Sorting of objects into groups with each group having its own characteristic properties (e.g. vehicles, pedestrians).
+- Package : Physical dimensions of a technical device (e.g. the housing of a sensor).
+- ToF : Time-of-Flight
+- MEMS : Micro-Electro-Mechanical Systems
+- FMCW : Frequency-modulated continuous wave
+- FOV : Field of view
+- Homogeneous coordinates : Mathematical concept that allows operations such as translation, rotation, scaling and perspective projection to be implemented as matrix operations.
+
+### 2. Equations
+
+#### a. Range equation that delivers the distance to a target
+
+$R = {1 \over {2n}} \cdot c \Delta t$
+
+#### b. LiDAR equation which describes the relationship between the power at the receiver and various characteristics of the technical setup and its physical surroundings
+
+$P(R) = P_0 \cdot \rho \cdot {A_0 \over {\pi \cdot R^2}} \cdot {\eta}_0 \cdot e^{-2\gamma R}$
+- $P(R)$ : power received
+- $P_0$ : peak power transmitter
+- $\rho$ : target reflectivity
+- $A_0$ : receiver aperture area
+- $\eta_{0}$ : transmission coefficient
+- $\gamma$ : atmospheric extinction coefficient
+
