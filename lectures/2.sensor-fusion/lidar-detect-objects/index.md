@@ -123,3 +123,51 @@ When using anchor boxes, you can evaluate all object predictions at once without
 The network returns a unique set of predictions for every anchor box defined. The final feature map represents object detections for each class. The use of anchor boxes enables a network to detect multiple objects, objects of different scales, and overlapping objects.
 
 As stated before, most of the CNN-based approaches originally come from the computer vision domain and have been developed with image-based detection in mind. Hence, in order to apply these methods to lidar point clouds, a conversion of 3d points into a 2d domain has to be performed. Which is exactly what we will be doing in the next chapter on object detection in point clouds.
+
+## II. Real-time 3D object detection on point clouds
+
+### 1. The Complex YOLO Algorithm
+
+In the paper [Complex-YOLO: Real-time 3D Object Detection on Point Clouds](https://arxiv.org/abs/1803.06199), M. Simon et al. extend the famous YOLO network for bounding box detection in 2D images to 3D point clouds. As can be seen from the following figure, the main pipeline of Complex YOLO consists of three steps:
+
+![alt text](image-11.png)
+
+#### a. Transforming the point cloud into a bird's eye view (BEV)
+
+First, the 3D point cloud is converted into a bird's eye view (BEV), which is achieved by compacting the point cloud along the upward-facing axis (the z-axis in the Waymo vehicle coordinate system). The BEV is divided into a grid consisting of equally sized cells, which enables us to treat it as an image, where each pixel corresponds to a region on the road surface. As can be seen from the following figure, several individual points often fall into the same grid element, especially on surfaces that are orthogonal to the road surface. The following figure illustrates the concept:
+
+![alt text](image-12.png)
+
+As can be seen, the density of points varies strongly between cells, depending on the presence of objects in the scene. While on the road surface, the number of points is comparatively low due to the angular resolution in vertical direction (64 laser beams), the number of points on the front, back or side of a vehicle is much higher as neighboring vertical LEDs are reflected from the same distance. This means that we can derive three pieces of information for each BEV cell, which are the intensity of the points, their height and their density. Hence, the resulting BEV map will have three channels, which from the perspective of the detection network, makes it a color image.
+
+The process of generating the BEV map is as follows:
+
+1. First, we need to decide the area we want to encompass. For the object detection in this course, we will set the longitudinal range to 0...50m and the lateral range to -25...+25m. The rationale for choosing this particular set of parameters is based partially on the original paper as well as on design choices in existing implementations of Complex YOLO.
+2. Then, we divide the area into a grid by specifying either the resolution of the resulting BEV image or by defining the size of a single grid cell. In our implementation, we are setting the size of the BEV image to 608 x 608 pixels, which results in a spatial resolution of ≈8cm.
+3. Now that we have divided the detection area into a grid, we need to identify the set of points $P_{ij}$ that falls into each cell, where $i,j$ are the respective cell coordinates. In the following, we will be using $N_{i,j}$ to refer to the number of points in a cell. As proposed in the original paper, we will assign the following information to the three channels of each cell:
+    - Height $H_{i,j} = max(P_{i,j} \cdot [0,0,1]T)$
+    - Intensity $I_{i,j} = max(I(P_{i,j}))$
+    - Density $D_{i,j} = min(1.0, \frac{log(N+1)}{64})$
+
+As you can see, $H_{i,j}$ encodes the maximum height in a cell, $I_{i,j}$ the maximum intensity and $D_{i,j}$ the normalized density of all points mapped into the cell. The resulting BEV image (which you will be creating in the second part of this chapter) looks like the following:
+
+![alt text](image-13.png)
+
+
+On the top-left, you can see the BEV map with all three channels superimposed. On the top right you can observe the height coded in green. It can clearly be seen that the roofs of the vehicles have a higher intensity than the road surface. On the lower left, you can see the intensity in blue. Depending on the contrast of your screen, you might be able to distinguish objects such as rear lights or license plates. If not, don't worry, we will investigate this more closely further on in this chapter. Finally, on the lower right, the point cloud density is displayed in red and it can clearly be seen that vehicle sides, fronts and rears show up the most. Also, with increasing distance, the point density on the road surface gets smaller, which obviously is related to perspective effects and the vertical angular resolution of the lidar.
+
+### 2. Complex YOLO on BEV map
+
+Let us now take a look at the network architecture, which can be seen in the following figure:
+
+![alt text](image-14.png)
+
+In the original publication, a simplified YOLOv2 CNN architecture has been used. Note that in our implementation in the mid-term project we will be using [YOLOv4](https://arxiv.org/abs/2004.10934) instead. Extensions to the original YOLO network are a complex angle regression and an Euler-Region Proposal Network (E-RPN), which serve to obtain the direction of bounding boxes around detected objects.
+
+The YOLO Network has been configured to divide the image into a 16 x 32 grid and predicts 75 features. The model has a total of 18 convolutional layers and 5 pooling layers. Also, there are 3 intermediate layers, which are used for feature reorganization. More details on the network layout can be obtained from the original publication (table 1).
+
+Let us discuss how the features per grid cell are obtained:
+
+- The YOLO network predicts a fixed set of boxes per cell, in this case 5. For each box, 6 individual parameters are obtained, which are its two-dimensional position in the BEV map, its width and length and two components for the orientation angle: $[x,y,w,l,\alpha_{Im},\alpha_{Re}]$
+- In addition to the box parameters, there is one parameter to indicate whether the bounding box contains an actual object and is accurately placed. Also, there are three parameters to indicate whether a box belongs to the classes "car", "pedestrian" or "bicycle".
+- Finally, there are the 5 additional parameters used by the Region Proposal Network to estimate accurate object orientations and boundaries.
