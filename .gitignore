@@ -164,3 +164,7 @@ cython_debug/
 .DS_Store
 
 project1-object-detection-urban/1_model_training/source_dir/checkpoint/*
+
+project2.1-3d-object-detection/dataset/*
+project2.1-3d-object-detection/tools/objdet_models/darknet/pretrained/*
+project2.1-3d-object-detection/tools/objdet_models/resnet/pretrained/*
