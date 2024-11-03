@@ -37,3 +37,31 @@ $\begin{bmatrix}v_x \\ v_y \end{bmatrix}$ based on the first measurement.
 
 ![alt text](image-4.png)
 
+## IV. Process noise covariance Q
+
+![alt text](image-5.png)
+
+## V. Lidar measurement model
+
+![alt text](image-6.png)
+
+### 1. Variables summary
+
+![alt text](image-7.png)
+
+### 2. Measurement noise covariance matrix $R$ explanation
+
+![alt text](image-8.png)
+
+## VI. Camera refresh
+
+![alt text](image-9.png)
+
+### 1. Camera measurement model
+
+![alt text](image-10.png)
+
+![alt text](image-11.png)
+
+![alt text](image-12.png)
+
