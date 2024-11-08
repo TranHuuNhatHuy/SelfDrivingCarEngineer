@@ -65,3 +65,64 @@ $\begin{bmatrix}v_x \\ v_y \end{bmatrix}$ based on the first measurement.
 
 ![alt text](image-12.png)
 
+## VII. Extended Kalman Filter (EKF)
+
+![alt text](image-13.png)
+
+Follow the arrows from top left to bottom to top right:
+1. A Gaussian from 10,000 random values in a normal distribution with a mean of 0.
+2. Using a nonlinear function, arctan, to transform each value.
+3. The resulting distribution.
+
+### 1. How to perform a Taylor Expansion
+
+![alt text](image-14.png)
+
+![alt text](image-15.png)
+
+This one looks much better! Notice how the blue graph, the output, remains a Gaussian after applying a first order Taylor expansion.
+
+### 2. Multivariate Taylor series
+
+![alt text](image-16.png)
+
+## VIII. EKF algorithm
+
+### 1. EFK equations
+
+![alt text](image-17.png)
+
+### 2. Algorithms
+
+![alt text](image-18.png)
+
+## IX. Coordinate transforms
+
+### 1. Sensors and coordinate systems
+
+![alt text](image-19.png)
+
+### 2. Coordinate transformation
+
+![alt text](image-20.png)
+
+![alt text](image-21.png)
+
+## X. Fusion summary
+
+![alt text](image-22.png)
+
+When a new measurement arrives, we perform the following steps:
+
+- Calculate the time step $Δt$ and the new state transition matrix $F$ and process noise covariance matrix $Q$.
+- Predict state and covariance to the next timestamp.
+- Transform the state from vehicle to sensor coordinates.
+- In case of a camera measurement, use the nonlinear measurement model and calculate the new Jacobian, otherwise use the linear measurement model to update state and covariance.
+
+## XI. Glossary
+
+![alt text](image-23.png)
+
+![alt text](image-24.png)
+
+![alt text](image-25.png)
